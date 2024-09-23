@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Geo Speak Translation App</title>
+    <style>
+        /* Basic Reset */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        /* Body Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            background-image: url('https://images.unsplash.com/photo-1548095115-45697e3559a2');
+            background-size: cover;
+            background-position: center;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            color: #333;
+        }
+
+        /* Navbar Styling */
+        nav {
+            background-color: #4b0082;
+            color: white;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+            font-size: 15px;
+        }
+
+        nav ul {
+            list-style-type: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav ul li {
+            display: inline;
+        }
+
+        nav ul li a {
+            color: white;
+            text-decoration: none;
+            font-size: 16px;
+            padding: 10px 15px;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        nav ul li a:hover {
+            color: #ffcc00;
+        }
+
+        /* Dropdown for settings in navbar */
+        .settings-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .settings-dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #f1f1f1;
+            min-width: 150px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 6px;
+        }
+
+        .settings-dropdown-content a {
+            color: black;
+            padding: 8px 12px;
+            text-decoration: none;
+            display: block;
+            background: none;
+            border: none;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .settings-dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+        .settings-dropdown:hover .settings-dropdown-content {
+            display: block;
+        }
+
+        /* Wrapper for layout */
+        .wrapper {
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            max-width: 1200px;
+            padding: 20px;
+            margin: auto;
+            flex-grow: 1;
+        }
+
+        /* Sidebar Styling */
+        .sidebar {
+            flex: 0 0 30%;
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 20px;
+            border-radius: 10px;
+            overflow-y: auto;
+            height: calc(100vh - 120px);
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .sidebar h2 {
+            margin-bottom: 20px;
+            text-align: center;
+            color: #4b0082;
+        }
+
+        /* History List Styling */
+        .history-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .history-list li {
+            background-color: #f1f1f1;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 8px;
+            position: relative;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-list li:hover {
+            background-color: #e6e6e6;
+        }
+
+        .history-list strong {
+            color: #4b0082;
+        }
+
+        /* Three-dot Dropdown Button */
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown .dropdown-button {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        /* Dropdown Menu */
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            right: 0;
+            background-color: #f1f1f1;
+            min-width: 100px;
+            box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
+            z-index: 1;
+            border-radius: 6px;
+        }
+
+        .dropdown-content button {
+            color: black;
+            padding: 8px 12px;
+            text-decoration: none;
+            display: block;
+            background: none;
+            border: none;
+            width: 100%;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .dropdown-content button:hover {
+            background-color: #ddd;
+        }
+
+        /* Show the dropdown menu on hover */
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        /* Main Content Container */
+        .container {
+            flex: 1;
+            background-color: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 20px;
+            margin-left: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4b0082;
+            margin-bottom: 20px;
+        }
+
+        /* Form and Input Styles */
+        label, textarea, select {
+            display: block;
+            width: 100%;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+
+        textarea {
+            height: 100px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            resize: none;
+        }
+
+        select {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+
+        /* Submit Button Styling */
+        button[type="submit"] {
+            width: 100%;
+            padding: 12px;
+            background-color: #4b0082;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin-top: 10px; /* Add margin for the Translate button */
+        }
+        
+        button[type="submit"]:hover {
+            background-color: #6a0dad;
+        }
+
+        /* Footer Styling */
+        footer {
+            background-color: #4b0082;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.2);
+            margin-top: 20px;
+        }
+
+        footer p, footer a {
+            color: white;
+            margin: 5px 0;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        /* Media Queries for responsiveness */
+        @media (max-width: 768px) {
+            .wrapper {
+                flex-direction: column;
+            }
+
+            .container {
+                margin-left: 0;
+                margin-top: 20px;
+            }
+
+            .sidebar {
+                height: auto;
+                margin-bottom: 20px;
+            }
+        }
+
+        /* Dark Mode Styles */
+        .dark-mode {
+            background-color: #333;
+            color: white;
+        }
+
+        .dark-mode nav {
+            background-color: black;
+        }
+
+        .dark-mode .sidebar, .dark-mode .container {
+            background-color: #444;
+            color: white;
+        }
+
+        .dark-mode button[type="submit"] {
+            background-color: #333;
+        }
+        .dropdown-button {
+            background-color: #4b0082;
+            color: #f1f1f1;
+            font-size: 15px;
+            cursor: pointer;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
+        
+        .dropdown-button:hover {
+            background-color: #6a0dad; /* Change background on hover */
+            color: #ffffff;
+            transform: scale(1.1); /* Slightly increase size on hover */
+        }
+        
+        /* Adding a bounce animation on hover */
+        @keyframes bounce {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        
+        .dropdown-button:hover {
+            animation: bounce 0.4s; /* Animation duration */
+        }
+        h3{
+            margin-top: 2%;
+        }
+        p{
+            margin-top: 2%;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Navbar Section -->
+<nav>
+    <div class="logo">GeoSpeak</div>
+    <ul>
+      
+        <li>
+            <div class="settings-dropdown">
+                <button class="dropdown-button">Settings ⋮</button>
+                <div class="settings-dropdown-content">
+                    <a href="#" onclick="toggleTheme()">Toggle Theme</a>
+                    
+                </div>
+            </div>
+        </li>
+    </ul>
+</nav>
+
+<div class="wrapper">
+
+    <!-- Sidebar Section -->
+    <div class="sidebar">
+        <h2>Translation History</h2>
+        <ul class="history-list">
+            {% for entry in history %}
+            <li id="history-item-{{ entry.id }}">
+                <strong>{{ entry.language }}:</strong> {{ entry.text }} → {{ entry.translated }}
+                <div class="dropdown">
+                    <button class="dropdown-button">⋮</button>
+                    <div class="dropdown-content">
+                      
+                        <button onclick="editHistoryEntry('{{ entry.id }}')">Edit</button>
+                        <button onclick="deleteHistoryEntry('{{ entry.id }}')">Delete</button>
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="container">
+        <h1>SFC-Hadoopians GeoSpeak</h1>
+        <form id="translation-form" method="POST" action="/translate">
+            <label for="text">Enter text to translate:</label>
+            <textarea name="text" id="text" required></textarea>
+
+            <label for="language">Select target language:</label>
+            <select name="language" id="language" required>
+                <option value="" disabled selected>Select a language</option>
+                <option value="Urdu">Urdu</option>
+<option value="Sindhi">Sindhi</option>
+<option value="Spanish">Spanish</option>
+<option value="French">French</option>
+<option value="Chinese">Chinese (Simplified)</option>
+<option value="Arabic">Arabic</option>
+<option value="German">German</option>
+<option value="Russian">Russian</option>
+<option value="Japanese">Japanese</option>
+<option value="Hindi">Hindi</option>
+<option value="Bengali">Bengali</option>
+
+                <!-- Add more languages as needed -->
+            </select>
+
+            <button type="submit">Translate</button>
+        </form>
+
+        <!-- Display translation result -->
+        {% if translation %}
+        <div class="translation-result">
+            <h3>Translated Text ({{ selected_language }}):</h3>
+            <p>{{ translation }}</p>
+            <form method="POST" action="/download_pdf">
+                <input type="hidden" name="translation" value="{{ translation }}">
+                <input type="hidden" name="selected_language" value="{{ selected_language }}">
+                <button type="submit">Download as PDF</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+<!-- Footer Section -->
+<footer>
+    <p>&copy; 2024 Geo Speak Translation App | Terms of Service</a></p>
+  
+</footer>
+
+<script>
+    const translationHistory = {{ history | tojson }};
+
+    // Function to toggle between light and dark theme
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+    }
+
+    // Function to view a specific history entry
+    function openHistoryEntry(entryId) {
+        const entry = translationHistory.find(e => e.id == entryId);
+        if (entry) {
+            alert(`Viewing entry:\nOriginal: ${entry.text}\nTranslated: ${entry.translated}`);
+        } else {
+            alert('History entry not found.');
+        }
+    }
+
+    // Function to edit a specific history entry
+    function editHistoryEntry(entryId) {
+        const entry = translationHistory.find(e => e.id == entryId);
+        if (entry) {
+            document.getElementById('text').value = entry.text;
+            document.getElementById('language').value = entry.language;
+            alert('Editing entry. Text and language loaded.');
+        } else {
+            alert('Entry not found.');
+        }
+    }
+
+    // Function to delete a history entry
+    function deleteHistoryEntry(entryId) {
+        fetch(`/delete_history/${entryId}`, {
+            method: 'DELETE',
+        })
+        .then(response => {
+            if (response.ok) {
+                document.getElementById(`history-item-${entryId}`).remove(); // Remove the item from the list
+                alert('History entry deleted.');
+            } else {
+                alert('Failed to delete entry.');
+            }
+        })
+        .catch(error => {
+            alert('Error deleting entry: ' + error);
+        });
+    }
+</script>
+
+</body>
+</html>
